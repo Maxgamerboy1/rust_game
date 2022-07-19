@@ -43,8 +43,6 @@ fn local_transform_by_offset(transform: &Transform, x_value: f32, y_value: f32) 
     ) + x_value;
     let y_offset = Vec2::dot(transform.translation.truncate(), transform.up().truncate()) - y_value;
 
-    println!("x_offset: {}  y_offset: {}", x_offset, y_offset);
-
     x_offset * transform.right() + y_offset * transform.up()
 }
 

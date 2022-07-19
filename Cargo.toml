@@ -7,4 +7,3 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.7.0"
-cached = "0.37.0"
