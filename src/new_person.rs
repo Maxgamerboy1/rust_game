@@ -11,14 +11,17 @@ use crate::gun::{Gun, GunBundle};
 pub struct PersonBundle {
     #[bundle]
     display: SpriteBundle,
-    movement: MovementDelta,
+    movement: MovementLock,
 }
 
 #[derive(Component)]
 pub struct Person;
 
+/**
+Order of bools: L,T,R,B
+*/
 #[derive(Component)]
-pub struct MovementDelta(pub f32, pub f32);
+pub struct MovementLock(pub bool, pub bool, pub bool, pub bool);
 
 #[derive(Component)]
 struct Display(pub SpriteBundle);
@@ -40,7 +43,7 @@ pub fn setup_people(mut commands: Commands) {
         .insert(Person)
         .insert_bundle(PersonBundle {
             display: sb,
-            movement: MovementDelta(0.0, 0.0),
+            movement: MovementLock(false, false, false, false),
         })
         .with_children(|parent| {
             parent
@@ -63,40 +66,18 @@ impl Person {
 
     pub fn handle_keyboard(
         mut keyboard_event: EventReader<KeyboardInput>,
-        mut query: Query<&mut MovementDelta, With<Person>>,
+        mut query: Query<&mut MovementLock, With<Person>>,
     ) {
         let mut movement = query.single_mut();
         for key in keyboard_event.iter() {
             match key.key_code {
                 Some(code) => {
-                    // println!("KeyCode: {:?}, isPressed: {}", code, key.state.is_pressed());
-                    if key.state.is_pressed() {
-                        if code == KeyCode::A {
-                            movement.0 = -BASE_SPEED;
-                        }
-                        if code == KeyCode::D {
-                            movement.0 = BASE_SPEED;
-                        }
-                        if code == KeyCode::W {
-                            movement.1 = BASE_SPEED;
-                        }
-                        if code == KeyCode::S {
-                            movement.1 = -BASE_SPEED;
-                        }
-                    } else {
-                        // BUG: quickly changing same-axis direction causes pause.
-                        if code == KeyCode::A {
-                            movement.0 = 0.0;
-                        }
-                        if code == KeyCode::D {
-                            movement.0 = 0.0;
-                        }
-                        if code == KeyCode::W {
-                            movement.1 = 0.0;
-                        }
-                        if code == KeyCode::S {
-                            movement.1 = 0.0;
-                        }
+                    match code {
+                        KeyCode::A => movement.0 = key.state.is_pressed(),
+                        KeyCode::W => movement.1 = key.state.is_pressed(),
+                        KeyCode::D => movement.2 = key.state.is_pressed(),
+                        KeyCode::S => movement.3 = key.state.is_pressed(),
+                        _ => {}
                     }
                 }
                 None => {}
@@ -104,9 +85,27 @@ impl Person {
         }
     }
 
-    pub fn draw(mut query: Query<(&mut Transform, &MovementDelta), With<Person>>) {
-        let (mut transform, trans) = query.single_mut();
-        transform.translation.x += trans.0;
-        transform.translation.y += trans.1;
+    pub fn draw(mut query: Query<(&mut Transform, &MovementLock), With<Person>>) {
+        let (mut transform, movement_lock) = query.single_mut();
+        let mut x_delta = 0.;
+        let mut y_delta = 0.;
+
+        // Right-handed, Y-Up coord system
+        if movement_lock.0 {
+            x_delta -= BASE_SPEED;
+        }
+        if movement_lock.2 {
+            x_delta += BASE_SPEED;
+        }
+
+        if movement_lock.1 {
+            y_delta += BASE_SPEED;
+        }
+        if movement_lock.3 {
+            y_delta -= BASE_SPEED;
+        }
+
+        transform.translation.x += x_delta;
+        transform.translation.y += y_delta;
     }
 }
