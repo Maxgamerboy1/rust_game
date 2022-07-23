@@ -15,6 +15,7 @@ impl Plugin for RustGamePlugin {
         app.add_system(gun::point_to_mouse);
         app.add_system(gun::shoot);
         app.add_system(gun::move_bullet);
+        app.add_system(gun::restrict_max_bullets);
         app.add_system(Person::handle_keyboard);
         app.add_system(Person::draw);
         app.add_system(wall::check_wall_collision);

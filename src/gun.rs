@@ -3,8 +3,8 @@ use bevy::{
     input::mouse::MouseButtonInput,
     math::{Quat, Vec2, Vec3, Vec3Swizzles},
     prelude::{
-        Bundle, Camera, Color, Commands, Component, EventReader, GlobalTransform, MouseButton,
-        Query, Res, Transform, With,
+        Bundle, Camera, Color, Commands, Component, Entity, EventReader, GlobalTransform,
+        MouseButton, Query, Res, Transform, With,
     },
     sprite::{Sprite, SpriteBundle},
     window::Windows,
@@ -44,6 +44,16 @@ fn local_transform_by_offset(transform: &Transform, x_value: f32, y_value: f32) 
     let y_offset = Vec2::dot(transform.translation.truncate(), transform.up().truncate()) - y_value;
 
     x_offset * transform.right() + y_offset * transform.up()
+}
+
+const MAX_BULLETS_ON_SCREEN: usize = 5;
+pub fn restrict_max_bullets(mut commands: Commands, q_bullet: Query<Entity, With<Bullet>>) {
+    let count = q_bullet.iter().count();
+    if count > MAX_BULLETS_ON_SCREEN {
+        if let Some(bullet) = q_bullet.iter().min() {
+            commands.entity(bullet).despawn();
+        }
+    }
 }
 
 pub fn shoot(
