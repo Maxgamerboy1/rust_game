@@ -1,8 +1,8 @@
 use bevy::ecs::bundle::Bundle;
-use bevy::math::{Vec3};
+use bevy::math::Vec3;
 use bevy::prelude::*;
 use bevy::prelude::{EventReader, Query, With};
-use bevy::sprite::{Sprite, SpriteBundle, Anchor};
+use bevy::sprite::{Anchor, Sprite, SpriteBundle};
 use bevy::{ecs::component::Component, input::keyboard::KeyboardInput};
 
 use crate::gun::{Gun, GunBundle};
@@ -54,7 +54,8 @@ pub fn setup_people(mut commands: Commands) {
                             anchor: Anchor::TopCenter,
                             ..Default::default()
                         },
-                        transform: Transform::from_xyz(0., 0., 2.).with_scale(Vec3::new(0.5, 1., 1.)),
+                        transform: Transform::from_xyz(0., 0., 2.)
+                            .with_scale(Vec3::new(0.5, 1., 1.)),
                         ..Default::default()
                     },
                 })
@@ -62,50 +63,46 @@ pub fn setup_people(mut commands: Commands) {
         });
 }
 
-impl Person {
-
-    pub fn handle_keyboard(
-        mut keyboard_event: EventReader<KeyboardInput>,
-        mut query: Query<&mut MovementLock, With<Person>>,
-    ) {
-        let mut movement = query.single_mut();
-        for key in keyboard_event.iter() {
-            match key.key_code {
-                Some(code) => {
-                    match code {
-                        KeyCode::A => movement.0 = key.state.is_pressed(),
-                        KeyCode::W => movement.1 = key.state.is_pressed(),
-                        KeyCode::D => movement.2 = key.state.is_pressed(),
-                        KeyCode::S => movement.3 = key.state.is_pressed(),
-                        _ => {}
-                    }
-                }
-                None => {}
-            }
+pub fn handle_keyboard(
+    mut keyboard_event: EventReader<KeyboardInput>,
+    mut query: Query<&mut MovementLock, With<Person>>,
+) {
+    let mut movement = query.single_mut();
+    for key in keyboard_event.iter() {
+        match key.key_code {
+            Some(code) => match code {
+                KeyCode::A => movement.0 = key.state.is_pressed(),
+                KeyCode::W => movement.1 = key.state.is_pressed(),
+                KeyCode::D => movement.2 = key.state.is_pressed(),
+                KeyCode::S => movement.3 = key.state.is_pressed(),
+                _ => {}
+            },
+            None => {}
         }
     }
+}
 
-    pub fn draw(mut query: Query<(&mut Transform, &MovementLock), With<Person>>) {
-        let (mut transform, movement_lock) = query.single_mut();
-        let mut x_delta = 0.;
-        let mut y_delta = 0.;
+pub fn move_person(mut query: Query<(&mut Transform, &MovementLock), With<Person>>) {
+    let (mut transform, movement_lock) = query.single_mut();
+    let mut x_delta = 0.;
+    let mut y_delta = 0.;
 
-        // Right-handed, Y-Up coord system
-        if movement_lock.0 {
-            x_delta -= BASE_SPEED;
-        }
-        if movement_lock.2 {
-            x_delta += BASE_SPEED;
-        }
-
-        if movement_lock.1 {
-            y_delta += BASE_SPEED;
-        }
-        if movement_lock.3 {
-            y_delta -= BASE_SPEED;
-        }
-
-        transform.translation.x += x_delta;
-        transform.translation.y += y_delta;
+    // Right-handed, Y-Up coord system
+    if movement_lock.0 {
+        x_delta -= BASE_SPEED;
     }
+    if movement_lock.2 {
+        x_delta += BASE_SPEED;
+    }
+
+    if movement_lock.1 {
+        y_delta += BASE_SPEED;
+    }
+    if movement_lock.3 {
+        y_delta -= BASE_SPEED;
+    }
+
+    // BUG: Causing stagger when mouse moves
+    transform.translation.x += x_delta;
+    transform.translation.y += y_delta;
 }
