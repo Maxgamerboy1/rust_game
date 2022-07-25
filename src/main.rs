@@ -4,6 +4,7 @@ mod main_scene;
 mod gun;
 mod new_person;
 mod wall;
+mod enemy;
 
 use bevy::{prelude::App, DefaultPlugins};
 use rust_game_plugin::RustGamePlugin;
