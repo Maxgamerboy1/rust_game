@@ -6,11 +6,11 @@ use bevy::{
         Bundle, Camera, Color, Commands, Component, Entity, EventReader, GlobalTransform,
         MouseButton, Query, Res, Transform, With,
     },
-    sprite::{Sprite, SpriteBundle},
+    sprite::{collide_aabb::collide, Sprite, SpriteBundle},
     window::Windows,
 };
 
-use crate::{main_scene::MainScene, new_person::Person};
+use crate::{main_scene::MainScene, new_person::Person, wall::Wall};
 
 #[derive(Component)]
 pub struct Gun;
@@ -46,12 +46,21 @@ fn local_transform_by_offset(transform: &Transform, x_value: f32, y_value: f32) 
     x_offset * transform.right() + y_offset * transform.up()
 }
 
-const MAX_BULLETS_ON_SCREEN: usize = 5;
-pub fn restrict_max_bullets(mut commands: Commands, q_bullet: Query<Entity, With<Bullet>>) {
-    let count = q_bullet.iter().count();
-    if count > MAX_BULLETS_ON_SCREEN {
-        if let Some(bullet) = q_bullet.iter().min() {
-            commands.entity(bullet).despawn();
+pub fn check_bullet_hit_wall(
+    mut commands: Commands,
+    q_bullet: Query<(Entity, &Transform), With<Bullet>>,
+    q_wall: Query<&Transform, With<Wall>>,
+) {
+    for (bullet_entity, bullet_transform) in q_bullet.iter() {
+        for wall_transform in q_wall.iter() {
+            if let Some(_) = collide(
+                bullet_transform.translation,
+                bullet_transform.scale.truncate(),
+                wall_transform.translation,
+                wall_transform.scale.truncate(),
+            ) {
+                commands.entity(bullet_entity).despawn();
+            }
         }
     }
 }
@@ -66,8 +75,6 @@ pub fn shoot(
         match item.button {
             MouseButton::Left => {
                 if item.state.is_pressed() {
-                    println!("Shooting");
-
                     let mut transform: Transform = gun_transform
                         .clone()
                         .with_scale(Vec3::new(12.0, 20.0, 1.0))
