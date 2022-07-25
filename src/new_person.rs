@@ -26,7 +26,7 @@ pub struct MovementLock(pub bool, pub bool, pub bool, pub bool);
 #[derive(Component)]
 struct Display(pub SpriteBundle);
 
-const BASE_SPEED: f32 = 2.0;
+const BASE_SPEED: f32 = 1.22;
 
 pub fn setup_people(mut commands: Commands) {
     let sb = SpriteBundle {
@@ -102,7 +102,7 @@ pub fn move_person(mut query: Query<(&mut Transform, &MovementLock), With<Person
         y_delta -= BASE_SPEED;
     }
 
-    // BUG: Causing stagger when mouse moves
+    // BUG: (debug-only) Causing stagger when mouse moves
     transform.translation.x += x_delta;
     transform.translation.y += y_delta;
 }

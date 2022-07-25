@@ -1,5 +1,5 @@
 use bevy::{
-    math::{Vec3},
+    math::Vec3,
     prelude::{Bundle, Color, Commands, Component, Query, Transform, With, Without},
     sprite::{
         collide_aabb::{collide, Collision},
@@ -62,9 +62,7 @@ pub fn check_wall_collision(
                 Collision::Right => x_delta += 2.,
                 Collision::Top => y_delta += 2.,
                 Collision::Bottom => y_delta -= 2.,
-                Collision::Inside => {
-                  // x_delta = 
-                }
+                _ =>{}
             }
 
             // println!("x_delta: {}  y_delta: {}", x_delta, y_delta);
