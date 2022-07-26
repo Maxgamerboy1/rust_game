@@ -1,4 +1,5 @@
 use bevy::{
+    core::Time,
     hierarchy::Parent,
     input::mouse::MouseButtonInput,
     math::{Quat, Vec2, Vec3, Vec3Swizzles},
@@ -24,15 +25,23 @@ pub struct GunBundle {
 #[derive(Component)]
 pub struct Bullet;
 
+#[derive(Component)]
+/// lifespan_boundary (s), lifespan (s)
+pub struct BulletLifespan(f32, f32);
+
 #[derive(Bundle)]
 struct BulletBundle {
     #[bundle]
     display: SpriteBundle,
 }
 
-pub fn move_bullet(mut q_bullet: Query<&mut Transform, With<Bullet>>) {
-    for mut bullet_transform in q_bullet.iter_mut() {
+pub fn move_bullet(
+    mut q_bullet: Query<(&mut Transform, &mut BulletLifespan), With<Bullet>>,
+    res_time: Res<Time>,
+) {
+    for (mut bullet_transform, mut bullet_lifespan) in q_bullet.iter_mut() {
         bullet_transform.translation = local_transform_by_offset(&bullet_transform, 0.0, 0.72);
+        bullet_lifespan.1 += res_time.delta_seconds();
     }
 }
 
@@ -44,6 +53,17 @@ fn local_transform_by_offset(transform: &Transform, x_value: f32, y_value: f32) 
     let y_offset = Vec2::dot(transform.translation.truncate(), transform.up().truncate()) - y_value;
 
     x_offset * transform.right() + y_offset * transform.up()
+}
+
+pub fn check_bullet_lifespan(
+    mut commands: Commands,
+    q_bullet: Query<(Entity, &BulletLifespan), With<Bullet>>,
+) {
+    for (bullet_entity, bullet_lifespan) in q_bullet.iter() {
+        if bullet_lifespan.1 > bullet_lifespan.0 {
+            commands.entity(bullet_entity).despawn();
+        }
+    }
 }
 
 pub fn check_bullet_hit_wall(
@@ -93,6 +113,7 @@ pub fn shoot(
                                 ..Default::default()
                             },
                         })
+                        .insert(BulletLifespan(3.0, 0.0))
                         .insert(Bullet);
                 }
             }
