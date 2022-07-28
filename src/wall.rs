@@ -65,8 +65,6 @@ pub fn check_wall_collision(
                 _ =>{}
             }
 
-            // println!("x_delta: {}  y_delta: {}", x_delta, y_delta);
-
             person_transform.translation.x += x_delta;
             person_transform.translation.y += y_delta;
         }
