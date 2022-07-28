@@ -1,6 +1,6 @@
 use bevy::{
     math::Vec3,
-    prelude::{Bundle, Color, Commands, Component, Query, Transform, With, Without},
+    prelude::{Bundle, Color, Commands, Component, Query, Transform, With, Without, Changed},
     sprite::{
         collide_aabb::{collide, Collision},
         Sprite, SpriteBundle,
@@ -43,7 +43,7 @@ pub fn setup_walls(mut commands: Commands) {
 }
 
 pub fn check_wall_collision(
-    mut q_person: Query<&mut Transform, With<Person>>,
+    mut q_person: Query<&mut Transform, (With<Person>, Changed<Transform>)>,
     q_wall: Query<&Transform, (With<Wall>, Without<Person>)>,
 ) {
     let mut person_transform = q_person.single_mut();

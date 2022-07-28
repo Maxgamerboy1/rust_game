@@ -26,7 +26,7 @@ pub struct MovementLock(pub bool, pub bool, pub bool, pub bool);
 #[derive(Component)]
 struct Display(pub SpriteBundle);
 
-const BASE_SPEED: f32 = 1.22;
+const BASE_SPEED: f32 = 0.94;
 
 pub fn setup_people(mut commands: Commands) {
     let sb = SpriteBundle {

@@ -40,7 +40,7 @@ pub fn move_bullet(
     res_time: Res<Time>,
 ) {
     for (mut bullet_transform, mut bullet_lifespan) in q_bullet.iter_mut() {
-        bullet_transform.translation = local_transform_by_offset(&bullet_transform, 0.0, 0.72);
+        bullet_transform.translation = local_transform_by_offset(&bullet_transform, 0.0, 1.0);
         bullet_lifespan.1 += res_time.delta_seconds();
     }
 }
@@ -133,7 +133,7 @@ pub fn shoot(
                                 ..Default::default()
                             },
                         })
-                        .insert(BulletLifespan(3.0, 0.0))
+                        .insert(BulletLifespan(1.33, 0.0))
                         .insert(Bullet);
                 }
             }
