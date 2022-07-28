@@ -11,7 +11,7 @@ use bevy::{
     window::Windows,
 };
 
-use crate::{main_scene::MainScene, new_person::Person, wall::Wall};
+use crate::{enemy::Enemy, main_scene::MainScene, new_person::Person, wall::Wall};
 
 #[derive(Component)]
 pub struct Gun;
@@ -53,6 +53,26 @@ fn local_transform_by_offset(transform: &Transform, x_value: f32, y_value: f32) 
     let y_offset = Vec2::dot(transform.translation.truncate(), transform.up().truncate()) - y_value;
 
     x_offset * transform.right() + y_offset * transform.up()
+}
+
+pub fn check_bullet_hit_enemy(
+    mut commands: Commands,
+    q_bullet: Query<(Entity, &Transform), With<Bullet>>,
+    q_enemy: Query<(Entity, &Transform), With<Enemy>>,
+) {
+    for (bullet_ent, bullet_transform) in q_bullet.iter() {
+        for (enemy_ent, enemy_transform) in q_enemy.iter() {
+            if let Some(_) = collide(
+                bullet_transform.translation,
+                bullet_transform.scale.truncate(),
+                enemy_transform.translation,
+                enemy_transform.scale.truncate(),
+            ) {
+                commands.entity(enemy_ent).despawn();
+                commands.entity(bullet_ent).despawn();
+            }
+        }
+    }
 }
 
 pub fn check_bullet_lifespan(
