@@ -1,5 +1,4 @@
 use bevy::{
-    core::Time,
     hierarchy::Parent,
     input::mouse::MouseButtonInput,
     math::{Quat, Vec2, Vec3, Vec3Swizzles},
@@ -8,7 +7,7 @@ use bevy::{
         MouseButton, Query, Res, Transform, With,
     },
     sprite::{collide_aabb::collide, Sprite, SpriteBundle},
-    window::Windows,
+    window::Windows, time::Time,
 };
 
 use crate::{enemy::Enemy, main_scene::MainScene, new_person::Person, wall::Wall};
@@ -116,9 +115,8 @@ pub fn shoot(
             MouseButton::Left => {
                 if item.state.is_pressed() {
                     let mut transform: Transform = gun_transform
-                        .clone()
-                        .with_scale(Vec3::new(12.0, 20.0, 1.0))
-                        .into();
+                        .compute_transform()
+                        .with_scale(Vec3::new(12.0, 20.0, 1.0));
 
                     transform.translation = local_transform_by_offset(&transform, 0.0, 35.0);
 
@@ -152,8 +150,8 @@ pub fn point_to_mouse(
 
     if let Some(cursor_in_screen_pos) = window.cursor_position() {
         let (parent, mut pos) = q_gun_child.single_mut();
-        if let Ok(parent_global_transform) = q_parent.get(parent.0) {
-            let absolute = parent_global_transform.translation + pos.translation;
+        if let Ok(parent_global_transform) = q_parent.get(parent.get()) {
+            let absolute = parent_global_transform.translation() + pos.translation;
 
             let (camera, camera_transform) = q_camera.single();
             // get the size of the window
@@ -184,7 +182,7 @@ fn get_inverse_projection_matrix(
     camera_transform: &GlobalTransform,
     camera: &Camera,
 ) -> bevy::math::Mat4 {
-    camera_transform.compute_matrix() * camera.projection_matrix.inverse()
+    camera_transform.compute_matrix() * camera.projection_matrix().inverse()
 }
 
 fn get_window_size(window: &bevy::window::Window) -> Vec2 {

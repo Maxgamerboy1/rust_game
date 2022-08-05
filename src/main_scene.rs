@@ -1,4 +1,4 @@
-use bevy::prelude::{Commands, Component, OrthographicCameraBundle, UiCameraBundle};
+use bevy::prelude::{Commands, Component, Camera2dBundle, UiCameraConfig};
 
 #[derive(Component)]
 pub struct MainScene;
@@ -6,6 +6,9 @@ pub struct MainScene;
 pub fn setup(mut commands: Commands) {
     commands
         .spawn()
-        .insert_bundle(OrthographicCameraBundle::new_2d())
+        .insert_bundle(Camera2dBundle::default())
+        .insert(UiCameraConfig {
+            show_ui: true
+        })
         .insert(MainScene);
 }
