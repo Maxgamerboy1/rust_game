@@ -1,7 +1,11 @@
 use bevy::{
     ecs::schedule::StateError,
-    prelude::{Color, Commands, Query, ResMut, State, Transform, With},
+    prelude::{
+        AssetServer, BuildChildren, Button, ButtonBundle, Changed, Children, Color, Commands,
+        Query, Res, ResMut, State, Transform, With, TextBundle,
+    },
     text::{HorizontalAlign, Text, Text2dBundle, TextAlignment, TextStyle, VerticalAlign},
+    ui::{AlignItems, Interaction, JustifyContent, Size, Style, Val},
 };
 
 use crate::{enemy::Enemy, rust_game_plugin::AppState};
@@ -22,22 +26,87 @@ pub fn check_win_conditions(
     }
 }
 
-pub fn display_win_screen(mut commands: Commands) {
-    println!("You win!!");
-    let mut winning_text = Text2dBundle::default();
-    winning_text.text = Text::from_section(
-        "You Win!!".to_string(),
-        TextStyle {
-            color: Color::WHITE,
-            font_size: 48.0,
-            ..Default::default()
-        },
-    )
-    .with_alignment(TextAlignment {
-        vertical: VerticalAlign::Center,
-        horizontal: HorizontalAlign::Center,
+pub fn display_win_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn_bundle(TextBundle {
+        text: Text::from_section(
+            "You Win!!".to_string(),
+            TextStyle {
+                color: Color::GOLD,
+                font_size: 48.0,
+                font: asset_server.load("fonts/FiraCode-Bold.ttf"),
+            },
+        )
+        .with_alignment(TextAlignment {
+            vertical: VerticalAlign::Center,
+            horizontal: HorizontalAlign::Center,
+        }),
+        ..Default::default()
     });
-    winning_text.transform = Transform::from_xyz(50.0, 50.0, 0.0);
+    commands.spawn_bundle(TextBundle {
+        text: Text::from_section(
+            "Play again?".to_string(),
+            TextStyle {
+                color: Color::ANTIQUE_WHITE,
+                font_size: 40.0,
+                font: asset_server.load("fonts/FiraCode-Bold.ttf"),
+            },
+        )
+        .with_alignment(TextAlignment {
+            vertical: VerticalAlign::Center,
+            horizontal: HorizontalAlign::Center,
+        }),
+        transform: Transform::from_xyz(0.0, -10.0, 0.0),
+        ..Default::default()
+    });
 
-    commands.spawn_bundle(winning_text);
+    commands
+        .spawn_bundle(ButtonBundle {
+            style: Style {
+                size: Size::new(Val::Px(150.0), Val::Px(65.0)),
+
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..Default::default()
+            },
+            color: bevy::ui::UiColor(Color::ALICE_BLUE),
+            ..Default::default()
+        })
+        .with_children(|parent| {
+            parent.spawn_bundle(TextBundle {
+                text: Text::from_section(
+                    "Play again?".to_string(),
+                    TextStyle {
+                        color: Color::ANTIQUE_WHITE,
+                        font_size: 40.0,
+                        font: asset_server.load("fonts/FiraCode-Bold.ttf"),
+                    },
+                )
+                .with_alignment(TextAlignment {
+                    vertical: VerticalAlign::Center,
+                    horizontal: HorizontalAlign::Center,
+                }),
+                transform: Transform::from_xyz(0.0, -10.0, 0.0),
+                ..Default::default()
+            });
+        });
+}
+
+pub fn button_system(
+    interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>)>,
+    mut res_app_state: ResMut<State<AppState>>,
+) {
+    for interaction in interaction_query.iter() {
+        match *interaction {
+            Interaction::Clicked => {
+                match res_app_state.set(AppState::InGame) {
+                    Ok(_) => {},
+                    Err(_) => {},
+                }
+            }
+            Interaction::Hovered => {
+            }
+            Interaction::None => {
+            }
+        }
+    }
 }

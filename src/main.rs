@@ -7,10 +7,13 @@ mod wall;
 mod enemy;
 mod game_rules;
 
+// use std::env;
+
 use bevy::{prelude::App, DefaultPlugins};
 use rust_game_plugin::RustGamePlugin;
 
 fn main() {
+    // env::set_var("RUST_BACKTRACE", "full");
     App::new()
     .add_plugins(DefaultPlugins)
     .add_plugin(RustGamePlugin)

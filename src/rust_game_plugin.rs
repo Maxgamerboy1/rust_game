@@ -45,4 +45,7 @@ fn setup_states(app: &mut App) {
     app.add_system_set(
         SystemSet::on_enter(AppState::Win).with_system(game_rules::display_win_screen),
     );
+    app.add_system_set(
+        SystemSet::on_update(AppState::Win).with_system(game_rules::button_system),
+    );
 }
