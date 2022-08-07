@@ -1,10 +1,10 @@
 use bevy::{
     ecs::schedule::StateError,
     prelude::{
-        AssetServer, BuildChildren, Button, ButtonBundle, Changed, Children, Color, Commands,
+        AssetServer, BuildChildren, Button, ButtonBundle, Changed, Color, Commands,
         Query, Res, ResMut, State, Transform, With, TextBundle,
     },
-    text::{HorizontalAlign, Text, Text2dBundle, TextAlignment, TextStyle, VerticalAlign},
+    text::{HorizontalAlign, Text, TextAlignment, TextStyle, VerticalAlign},
     ui::{AlignItems, Interaction, JustifyContent, Size, Style, Val},
 };
 

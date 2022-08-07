@@ -30,7 +30,7 @@ fn setup_states(app: &mut App) {
     );
     app.add_system_set(
         SystemSet::on_update(AppState::InGame)
-            .with_system(gun::point_to_mouse)
+            .with_system(gun::handle_aim)
             .with_system(gun::shoot)
             .with_system(gun::move_bullet)
             .with_system(gun::check_bullet_hit_wall)

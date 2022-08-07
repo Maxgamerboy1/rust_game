@@ -1,10 +1,10 @@
 use bevy::{
     hierarchy::Parent,
-    input::mouse::MouseButtonInput,
+    input::{mouse::MouseButtonInput, keyboard::KeyboardInput},
     math::{Quat, Vec2, Vec3, Vec3Swizzles},
     prelude::{
         Bundle, Camera, Color, Commands, Component, Entity, EventReader, GlobalTransform,
-        MouseButton, Query, Res, Transform, With,
+        MouseButton, Query, Res, Transform, With, KeyCode,
     },
     sprite::{collide_aabb::collide, Sprite, SpriteBundle},
     window::Windows, time::Time,
@@ -140,51 +140,23 @@ pub fn shoot(
     }
 }
 
-pub fn point_to_mouse(
-    windows: Res<Windows>,
+pub fn handle_aim(
+    mut keyboard_event: EventReader<KeyboardInput>,
     mut q_gun_child: Query<(&Parent, &mut Transform), With<Gun>>,
-    q_parent: Query<&GlobalTransform, With<Person>>,
-    q_camera: Query<(&Camera, &GlobalTransform), With<MainScene>>,
 ) {
-    let window = windows.get_primary().unwrap();
-
-    if let Some(cursor_in_screen_pos) = window.cursor_position() {
-        let (parent, mut pos) = q_gun_child.single_mut();
-        if let Ok(parent_global_transform) = q_parent.get(parent.get()) {
-            let absolute = parent_global_transform.translation() + pos.translation;
-
-            let (camera, camera_transform) = q_camera.single();
-            // get the size of the window
-            let window_size = get_window_size(window);
-
-            // convert screen position [0..resolution] to ndc [-1..1] (gpu coordinates)
-            let ndc = (cursor_in_screen_pos / window_size) * 2.0 - Vec2::ONE;
-
-            // matrix for undoing the projection and camera transform
-            let ndc_to_world = get_inverse_projection_matrix(camera_transform, camera);
-
-            // use it to convert ndc to world-space coordinates
-            let world_pos = ndc_to_world.project_point3(ndc.extend(-1.0));
-
-            // reduce it to a 2D value
-            let world_pos: Vec2 = world_pos.truncate();
-
-            let to_pointer = absolute.xy() - world_pos;
-            let to_pointer_norm = to_pointer.normalize();
-            let rotate_to_pointer = Quat::from_rotation_arc(Vec3::Y, to_pointer_norm.extend(0.));
-
-            pos.rotation = rotate_to_pointer;
+    let mut dir = Vec3::new(0.0, 1.0, 0.0);
+    for key in keyboard_event.iter() {
+        match key.key_code {
+            Some(key_code) => {
+                match key_code {
+                    KeyCode::Up => dir.x = 0.75,
+                    _ => {}
+                }
+            },
+            None => {},
         }
     }
-}
 
-fn get_inverse_projection_matrix(
-    camera_transform: &GlobalTransform,
-    camera: &Camera,
-) -> bevy::math::Mat4 {
-    camera_transform.compute_matrix() * camera.projection_matrix().inverse()
-}
-
-fn get_window_size(window: &bevy::window::Window) -> Vec2 {
-    Vec2::new(window.width() as f32, window.height() as f32)
+    let (parent, mut gun_transform) = q_gun_child.single_mut();
+    // gun_transform.look_at(dir, Vec3::X);
 }
