@@ -1,16 +1,18 @@
+use std::ops::Mul;
+
 use bevy::{
     hierarchy::Parent,
-    input::{mouse::MouseButtonInput, keyboard::KeyboardInput},
-    math::{Quat, Vec2, Vec3, Vec3Swizzles},
+    input::{keyboard::KeyboardInput, mouse::MouseButtonInput},
+    math::{Vec2, Vec3},
     prelude::{
-        Bundle, Camera, Color, Commands, Component, Entity, EventReader, GlobalTransform,
-        MouseButton, Query, Res, Transform, With, KeyCode,
+        Bundle, Color, Commands, Component, Entity, EventReader, GlobalTransform, KeyCode,
+        MouseButton, Query, Res, Transform, With, Without,
     },
     sprite::{collide_aabb::collide, Sprite, SpriteBundle},
-    window::Windows, time::Time,
+    time::Time,
 };
 
-use crate::{enemy::Enemy, main_scene::MainScene, new_person::Person, wall::Wall};
+use crate::{enemy::Enemy, new_person::Person, wall::Wall};
 
 #[derive(Component)]
 pub struct Gun;
@@ -143,20 +145,25 @@ pub fn shoot(
 pub fn handle_aim(
     mut keyboard_event: EventReader<KeyboardInput>,
     mut q_gun_child: Query<(&Parent, &mut Transform), With<Gun>>,
+    q_parent: Query<&Transform, (With<Person>, Without<Gun>)>,
 ) {
-    let mut dir = Vec3::new(0.0, 1.0, 0.0);
-    for key in keyboard_event.iter() {
-        match key.key_code {
-            Some(key_code) => {
-                match key_code {
-                    KeyCode::Up => dir.x = 0.75,
+    let (parent, mut gun_transform) = q_gun_child.single_mut();
+    if let Ok(person_transform) = q_parent.get(parent.get()) {
+        for key in keyboard_event.iter() {
+            let mut dir: Option<Vec3> = None;
+            match key.key_code {
+                Some(key_code) => match key_code {
+                    KeyCode::Down => dir = Some(person_transform.up()),
+                    KeyCode::Left => dir = Some(person_transform.right()),
+                    KeyCode::Right => dir = Some(person_transform.right() * Vec3::new(-1.0, -1.0, 1.0)),
+                    KeyCode::Up => dir = Some(person_transform.up() * Vec3::new(-1.0, -1.0, 1.0)),
                     _ => {}
-                }
-            },
-            None => {},
+                },
+                None => {}
+            }
+            if let Some(set_dir) = dir {
+                gun_transform.look_at(Vec3::Z, set_dir);
+            }
         }
     }
-
-    let (parent, mut gun_transform) = q_gun_child.single_mut();
-    // gun_transform.look_at(dir, Vec3::X);
 }
