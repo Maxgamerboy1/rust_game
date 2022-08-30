@@ -1,14 +1,9 @@
 use bevy::{
     ecs::schedule::StateError,
-    prelude::{
-        AssetServer, BuildChildren, Button, ButtonBundle, Changed, Color, Commands,
-        Query, Res, ResMut, State, Transform, With, TextBundle,
-    },
-    text::{HorizontalAlign, Text, TextAlignment, TextStyle, VerticalAlign},
-    ui::{AlignItems, Interaction, JustifyContent, Size, Style, Val},
+    prelude::*,
 };
 
-use crate::{enemy::Enemy, rust_game_plugin::AppState};
+use crate::{rust_game_plugin::AppState, enemy::models::Enemy};
 
 pub fn check_win_conditions(
     q_enemy: Query<(), With<Enemy>>,

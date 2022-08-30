@@ -1,22 +1,11 @@
+pub mod models;
+
+use crate::person::models::Person;
+use models::*;
 use bevy::{
-    math::Vec3,
-    prelude::{Bundle, Color, Commands, Component, Query, Transform, With, Without, Changed},
-    sprite::{
-        collide_aabb::{collide, Collision},
-        Sprite, SpriteBundle,
-    },
+    prelude::*,
+    sprite::collide_aabb::{collide, Collision},
 };
-
-use crate::new_person::Person;
-
-#[derive(Component)]
-pub struct Wall;
-
-#[derive(Bundle)]
-struct WallBundle {
-    #[bundle]
-    sp: SpriteBundle,
-}
 
 pub fn setup_walls(mut commands: Commands) {
     commands.spawn().insert(Wall).insert_bundle(WallBundle {
@@ -62,7 +51,7 @@ pub fn check_wall_collision(
                 Collision::Right => x_delta += 2.,
                 Collision::Top => y_delta += 2.,
                 Collision::Bottom => y_delta -= 2.,
-                _ =>{}
+                _ => {}
             }
 
             person_transform.translation.x += x_delta;

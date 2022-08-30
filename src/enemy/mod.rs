@@ -1,16 +1,8 @@
-use bevy::{
-    math::Vec3,
-    prelude::{Color, Commands, Component, Res, Transform, Query, With},
-    sprite::{Sprite, SpriteBundle},
-    window::Windows,
-};
+pub mod models;
+
+use bevy::prelude::*;
+use models::*;
 use rand::Rng;
-
-#[derive(Component)]
-pub struct Enemy;
-
-#[derive(Component)]
-pub struct EnemySpeed(f32);
 
 pub fn setup(mut commands: Commands, windows: Res<Windows>) {
     if let Some(window) = windows.get_primary() {
@@ -39,7 +31,7 @@ pub fn setup(mut commands: Commands, windows: Res<Windows>) {
 
 pub fn move_enemy(
     windows: Res<Windows>,
-    mut q_enemy: Query<(&mut EnemySpeed, &mut Transform), With<Enemy>>
+    mut q_enemy: Query<(&mut EnemySpeed, &mut Transform), With<Enemy>>,
 ) {
     for (mut enemy_speed, mut enemy_transform) in q_enemy.iter_mut() {
         enemy_transform.translation.y -= enemy_speed.0;
@@ -48,10 +40,11 @@ pub fn move_enemy(
             let window_height = window.height();
             if enemy_transform.translation.y < -window_height / 2.0 {
                 enemy_transform.translation.y = window_height;
-                
+
                 let mut rng = rand::thread_rng();
                 let window_width = window.width();
-                enemy_transform.translation.x = rng.gen_range(-window_width / 2.0..window_width / 2.0);
+                enemy_transform.translation.x =
+                    rng.gen_range(-window_width / 2.0..window_width / 2.0);
                 enemy_speed.0 = rng.gen_range(0.632..2.0);
             }
         }

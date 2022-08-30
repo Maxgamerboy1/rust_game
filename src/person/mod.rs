@@ -1,32 +1,8 @@
-use bevy::ecs::bundle::Bundle;
-use bevy::math::Vec3;
-use bevy::prelude::*;
-use bevy::prelude::{EventReader, Query, With};
-use bevy::sprite::{Anchor, Sprite, SpriteBundle};
-use bevy::{ecs::component::Component, input::keyboard::KeyboardInput};
+pub mod models;
 
-use crate::gun::{Gun, GunBundle};
-
-#[derive(Bundle)]
-pub struct PersonBundle {
-    #[bundle]
-    display: SpriteBundle,
-    movement: MovementLock,
-}
-
-#[derive(Component)]
-pub struct Person;
-
-/**
-Order of bools: L,T,R,B
-*/
-#[derive(Component)]
-pub struct MovementLock(pub bool, pub bool, pub bool, pub bool);
-
-#[derive(Component)]
-struct Display(pub SpriteBundle);
-
-const BASE_SPEED: f32 = 0.98;
+use crate::gun::models::{GunBundle, Gun};
+use models::*;
+use bevy::{prelude::*, sprite::Anchor, input::keyboard::KeyboardInput};
 
 pub fn setup_people(mut commands: Commands) {
     let sb = SpriteBundle {
@@ -81,6 +57,8 @@ pub fn handle_keyboard(
         }
     }
 }
+
+const BASE_SPEED: f32 = 0.98;
 
 pub fn move_person(mut query: Query<(&mut Transform, &MovementLock), With<Person>>) {
     let (mut transform, movement_lock) = query.single_mut();

@@ -1,91 +1,16 @@
-use std::ops::Mul;
+pub mod bullet;
+pub mod models;
+
+use bullet::models::*;
+use models::*;
 
 use bevy::{
-    hierarchy::Parent,
     input::{keyboard::KeyboardInput, mouse::MouseButtonInput},
-    math::{Vec2, Vec3},
-    prelude::{
-        Bundle, Color, Commands, Component, Entity, EventReader, GlobalTransform, KeyCode,
-        MouseButton, Query, Res, Transform, With, Without,
-    },
-    sprite::{collide_aabb::collide, Sprite, SpriteBundle},
-    time::Time,
+    prelude::*,
+    sprite::collide_aabb::collide,
 };
 
-use crate::{enemy::Enemy, new_person::Person, wall::Wall};
-
-#[derive(Component)]
-pub struct Gun;
-
-#[derive(Bundle)]
-pub struct GunBundle {
-    #[bundle]
-    pub display: SpriteBundle,
-}
-
-#[derive(Component)]
-pub struct Bullet;
-
-#[derive(Component)]
-/// lifespan_boundary (s), lifespan (s)
-pub struct BulletLifespan(f32, f32);
-
-#[derive(Bundle)]
-struct BulletBundle {
-    #[bundle]
-    display: SpriteBundle,
-}
-
-pub fn move_bullet(
-    mut q_bullet: Query<(&mut Transform, &mut BulletLifespan), With<Bullet>>,
-    res_time: Res<Time>,
-) {
-    for (mut bullet_transform, mut bullet_lifespan) in q_bullet.iter_mut() {
-        bullet_transform.translation = local_transform_by_offset(&bullet_transform, 0.0, 1.0);
-        bullet_lifespan.1 += res_time.delta_seconds();
-    }
-}
-
-fn local_transform_by_offset(transform: &Transform, x_value: f32, y_value: f32) -> Vec3 {
-    let x_offset = Vec2::dot(
-        transform.translation.truncate(),
-        transform.right().truncate(),
-    ) + x_value;
-    let y_offset = Vec2::dot(transform.translation.truncate(), transform.up().truncate()) - y_value;
-
-    x_offset * transform.right() + y_offset * transform.up()
-}
-
-pub fn check_bullet_hit_enemy(
-    mut commands: Commands,
-    q_bullet: Query<(Entity, &Transform), With<Bullet>>,
-    q_enemy: Query<(Entity, &Transform), With<Enemy>>,
-) {
-    for (bullet_ent, bullet_transform) in q_bullet.iter() {
-        for (enemy_ent, enemy_transform) in q_enemy.iter() {
-            if let Some(_) = collide(
-                bullet_transform.translation,
-                bullet_transform.scale.truncate(),
-                enemy_transform.translation,
-                enemy_transform.scale.truncate(),
-            ) {
-                commands.entity(enemy_ent).despawn();
-                commands.entity(bullet_ent).despawn();
-            }
-        }
-    }
-}
-
-pub fn check_bullet_lifespan(
-    mut commands: Commands,
-    q_bullet: Query<(Entity, &BulletLifespan), With<Bullet>>,
-) {
-    for (bullet_entity, bullet_lifespan) in q_bullet.iter() {
-        if bullet_lifespan.1 > bullet_lifespan.0 {
-            commands.entity(bullet_entity).despawn();
-        }
-    }
-}
+use crate::{person::models::Person, wall::models::Wall};
 
 pub fn check_bullet_hit_wall(
     mut commands: Commands,
@@ -120,7 +45,8 @@ pub fn shoot(
                         .compute_transform()
                         .with_scale(Vec3::new(12.0, 20.0, 1.0));
 
-                    transform.translation = local_transform_by_offset(&transform, 0.0, 35.0);
+                    transform.translation =
+                        bullet::local_transform_by_offset(&transform, 0.0, 35.0);
 
                     commands
                         .spawn_bundle(BulletBundle {
@@ -155,7 +81,9 @@ pub fn handle_aim(
                 Some(key_code) => match key_code {
                     KeyCode::Down => dir = Some(person_transform.up()),
                     KeyCode::Left => dir = Some(person_transform.right()),
-                    KeyCode::Right => dir = Some(person_transform.right() * Vec3::new(-1.0, -1.0, 1.0)),
+                    KeyCode::Right => {
+                        dir = Some(person_transform.right() * Vec3::new(-1.0, -1.0, 1.0))
+                    }
                     KeyCode::Up => dir = Some(person_transform.up() * Vec3::new(-1.0, -1.0, 1.0)),
                     _ => {}
                 },

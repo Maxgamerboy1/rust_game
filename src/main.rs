@@ -1,8 +1,8 @@
-// MARK: module definitions
+// MARK: top-level module definitions
 mod rust_game_plugin;
 mod main_scene;
 mod gun;
-mod new_person;
+mod person;
 mod wall;
 mod enemy;
 mod game_rules;

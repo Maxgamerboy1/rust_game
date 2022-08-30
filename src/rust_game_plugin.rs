@@ -1,5 +1,5 @@
 use crate::{enemy, game_rules, gun};
-use crate::{main_scene, new_person, wall};
+use crate::{main_scene, person, wall};
 use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::Plugin;
 use bevy::prelude::{App, SystemSet};
@@ -24,7 +24,7 @@ fn setup_states(app: &mut App) {
     app.add_system_set(
         SystemSet::on_enter(AppState::InGame)
             .with_system(wall::setup_walls)
-            .with_system(new_person::setup_people)
+            .with_system(person::setup_people)
             .with_system(main_scene::setup)
             .with_system(enemy::setup),
     );
@@ -32,12 +32,12 @@ fn setup_states(app: &mut App) {
         SystemSet::on_update(AppState::InGame)
             .with_system(gun::handle_aim)
             .with_system(gun::shoot)
-            .with_system(gun::move_bullet)
+            .with_system(gun::bullet::move_bullet)
             .with_system(gun::check_bullet_hit_wall)
-            .with_system(gun::check_bullet_hit_enemy)
-            .with_system(gun::check_bullet_lifespan)
-            .with_system(new_person::handle_keyboard)
-            .with_system(new_person::move_person)
+            .with_system(gun::bullet::check_bullet_hit_enemy)
+            .with_system(gun::bullet::check_bullet_lifespan)
+            .with_system(person::handle_keyboard)
+            .with_system(person::move_person)
             .with_system(wall::check_wall_collision)
             .with_system(enemy::move_enemy)
             .with_system(game_rules::check_win_conditions),
