@@ -30,7 +30,8 @@ fn setup_states(app: &mut App) {
     );
     app.add_system_set(
         SystemSet::on_update(AppState::InGame)
-            .with_system(gun::handle_aim)
+            .with_system(gun::set_aim_lock)
+            .with_system(gun::handle_aim_lock)
             .with_system(gun::shoot)
             .with_system(gun::bullet::move_bullet)
             .with_system(gun::check_bullet_hit_wall)
@@ -45,7 +46,5 @@ fn setup_states(app: &mut App) {
     app.add_system_set(
         SystemSet::on_enter(AppState::Win).with_system(game_rules::display_win_screen),
     );
-    app.add_system_set(
-        SystemSet::on_update(AppState::Win).with_system(game_rules::button_system),
-    );
+    app.add_system_set(SystemSet::on_update(AppState::Win).with_system(game_rules::button_system));
 }

@@ -1,8 +1,8 @@
 pub mod models;
 
-use crate::gun::models::{GunBundle, Gun};
+use crate::gun::models::{Gun, GunBundle, RotationLock};
+use bevy::{input::keyboard::KeyboardInput, prelude::*, sprite::Anchor};
 use models::*;
-use bevy::{prelude::*, sprite::Anchor, input::keyboard::KeyboardInput};
 
 pub fn setup_people(mut commands: Commands) {
     let sb = SpriteBundle {
@@ -34,6 +34,7 @@ pub fn setup_people(mut commands: Commands) {
                             .with_scale(Vec3::new(0.5, 1., 1.)),
                         ..Default::default()
                     },
+                    rotation_lock: RotationLock(0.0),
                 })
                 .insert(Gun);
         });

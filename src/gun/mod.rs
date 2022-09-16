@@ -4,11 +4,7 @@ pub mod models;
 use bullet::models::*;
 use models::*;
 
-use bevy::{
-    input::{keyboard::KeyboardInput, mouse::MouseButtonInput},
-    prelude::*,
-    sprite::collide_aabb::collide,
-};
+use bevy::{input::keyboard::KeyboardInput, prelude::*, sprite::collide_aabb::collide};
 
 use crate::{person::models::Person, wall::models::Wall};
 
@@ -33,14 +29,14 @@ pub fn check_bullet_hit_wall(
 
 pub fn shoot(
     mut commands: Commands,
-    mut mouse_button: EventReader<MouseButtonInput>,
+    mut mouse_button: EventReader<KeyboardInput>,
     q_gun: Query<&GlobalTransform, With<Gun>>,
 ) {
     let gun_transform = q_gun.single();
     for item in mouse_button.iter() {
-        match item.button {
-            MouseButton::Left => {
-                if item.state.is_pressed() {
+        if item.state.is_pressed() {
+            if let Some(key_code) = item.key_code {
+                if key_code == KeyCode::Space {
                     let mut transform: Transform = gun_transform
                         .compute_transform()
                         .with_scale(Vec3::new(12.0, 20.0, 1.0));
@@ -63,35 +59,40 @@ pub fn shoot(
                         .insert(Bullet);
                 }
             }
+        }
+    }
+}
+
+const ROTATION_SPEED: f32 = 0.05;
+pub fn set_aim_lock(
+    mut keyboard_event: EventReader<KeyboardInput>,
+    mut q_gun_child: Query<&mut RotationLock, With<Gun>>,
+) {
+    let mut rotation_lock = q_gun_child.single_mut();
+    for input in keyboard_event.iter() {
+        match input.key_code {
+            Some(x) if x == KeyCode::Left => {
+                rotation_lock.0 = if input.state.is_pressed() {
+                    ROTATION_SPEED
+                } else {
+                    0.0
+                };
+            }
+            Some(x) if x == KeyCode::Right => {
+                rotation_lock.0 = if input.state.is_pressed() {
+                    -ROTATION_SPEED
+                } else {
+                    0.0
+                };
+            }
             _ => {}
         }
     }
 }
 
-pub fn handle_aim(
-    mut keyboard_event: EventReader<KeyboardInput>,
-    mut q_gun_child: Query<(&Parent, &mut Transform), With<Gun>>,
-    q_parent: Query<&Transform, (With<Person>, Without<Gun>)>,
-) {
-    let (parent, mut gun_transform) = q_gun_child.single_mut();
-    if let Ok(person_transform) = q_parent.get(parent.get()) {
-        for key in keyboard_event.iter() {
-            let mut dir: Option<Vec3> = None;
-            match key.key_code {
-                Some(key_code) => match key_code {
-                    KeyCode::Down => dir = Some(person_transform.up()),
-                    KeyCode::Left => dir = Some(person_transform.right()),
-                    KeyCode::Right => {
-                        dir = Some(person_transform.right() * Vec3::new(-1.0, -1.0, 1.0))
-                    }
-                    KeyCode::Up => dir = Some(person_transform.up() * Vec3::new(-1.0, -1.0, 1.0)),
-                    _ => {}
-                },
-                None => {}
-            }
-            if let Some(set_dir) = dir {
-                gun_transform.look_at(Vec3::Z, set_dir);
-            }
-        }
+pub fn handle_aim_lock(mut q_gun_child: Query<(&RotationLock, &mut Transform), With<Gun>>) {
+    let (rotation_lock, mut gun_transform) = q_gun_child.single_mut();
+    if rotation_lock.0 != 0.0 {
+        gun_transform.rotate_local(Quat::from_rotation_z(rotation_lock.0));
     }
 }
