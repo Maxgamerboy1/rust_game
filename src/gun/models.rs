@@ -4,8 +4,10 @@ use bevy::prelude::*;
 pub struct Gun;
 
 /// angle: -1.0 :: 1.0, anti-clockwise :: clockwise
-#[derive(Component)]
-pub struct RotationLock(pub f32);
+#[derive(Component, Default)]
+pub struct RotationLock {
+    pub angle: f32,
+}
 
 #[derive(Bundle)]
 pub struct GunBundle {

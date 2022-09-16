@@ -34,7 +34,7 @@ pub fn setup_people(mut commands: Commands) {
                             .with_scale(Vec3::new(0.5, 1., 1.)),
                         ..Default::default()
                     },
-                    rotation_lock: RotationLock(0.0),
+                    rotation_lock: RotationLock::default(),
                 })
                 .insert(Gun);
         });

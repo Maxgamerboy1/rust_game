@@ -6,7 +6,7 @@ use models::*;
 
 use bevy::{input::keyboard::KeyboardInput, prelude::*, sprite::collide_aabb::collide};
 
-use crate::{person::models::Person, wall::models::Wall};
+use crate::wall::models::Wall;
 
 pub fn check_bullet_hit_wall(
     mut commands: Commands,
@@ -72,14 +72,14 @@ pub fn set_aim_lock(
     for input in keyboard_event.iter() {
         match input.key_code {
             Some(x) if x == KeyCode::Left => {
-                rotation_lock.0 = if input.state.is_pressed() {
+                rotation_lock.angle = if input.state.is_pressed() {
                     ROTATION_SPEED
                 } else {
                     0.0
                 };
             }
             Some(x) if x == KeyCode::Right => {
-                rotation_lock.0 = if input.state.is_pressed() {
+                rotation_lock.angle = if input.state.is_pressed() {
                     -ROTATION_SPEED
                 } else {
                     0.0
@@ -92,7 +92,7 @@ pub fn set_aim_lock(
 
 pub fn handle_aim_lock(mut q_gun_child: Query<(&RotationLock, &mut Transform), With<Gun>>) {
     let (rotation_lock, mut gun_transform) = q_gun_child.single_mut();
-    if rotation_lock.0 != 0.0 {
-        gun_transform.rotate_local(Quat::from_rotation_z(rotation_lock.0));
+    if rotation_lock.angle != 0.0 {
+        gun_transform.rotate_local(Quat::from_rotation_z(rotation_lock.angle));
     }
 }
