@@ -44,17 +44,18 @@ pub fn handle_keyboard(
     mut keyboard_event: EventReader<KeyboardInput>,
     mut query: Query<&mut MovementLock, With<Person>>,
 ) {
-    let mut movement = query.single_mut();
-    for key in keyboard_event.iter() {
-        match key.key_code {
-            Some(code) => match code {
-                KeyCode::A => movement.0 = key.state.is_pressed(),
-                KeyCode::W => movement.1 = key.state.is_pressed(),
-                KeyCode::D => movement.2 = key.state.is_pressed(),
-                KeyCode::S => movement.3 = key.state.is_pressed(),
-                _ => {}
-            },
-            None => {}
+    if let Ok(mut movement) = query.get_single_mut() {
+        for key in keyboard_event.iter() {
+            match key.key_code {
+                Some(code) => match code {
+                    KeyCode::A => movement.0 = key.state.is_pressed(),
+                    KeyCode::W => movement.1 = key.state.is_pressed(),
+                    KeyCode::D => movement.2 = key.state.is_pressed(),
+                    KeyCode::S => movement.3 = key.state.is_pressed(),
+                    _ => {}
+                },
+                None => {}
+            }
         }
     }
 }
@@ -62,26 +63,27 @@ pub fn handle_keyboard(
 const BASE_SPEED: f32 = 0.98;
 
 pub fn move_person(mut query: Query<(&mut Transform, &MovementLock), With<Person>>) {
-    let (mut transform, movement_lock) = query.single_mut();
-    let mut x_delta = 0.;
-    let mut y_delta = 0.;
+    if let Ok((mut transform, movement_lock)) = query.get_single_mut() {
+        let mut x_delta = 0.;
+        let mut y_delta = 0.;
 
-    // Right-handed, Y-Up coord system
-    if movement_lock.0 {
-        x_delta -= BASE_SPEED;
-    }
-    if movement_lock.2 {
-        x_delta += BASE_SPEED;
-    }
+        // Right-handed, Y-Up coord system
+        if movement_lock.0 {
+            x_delta -= BASE_SPEED;
+        }
+        if movement_lock.2 {
+            x_delta += BASE_SPEED;
+        }
 
-    if movement_lock.1 {
-        y_delta += BASE_SPEED;
-    }
-    if movement_lock.3 {
-        y_delta -= BASE_SPEED;
-    }
+        if movement_lock.1 {
+            y_delta += BASE_SPEED;
+        }
+        if movement_lock.3 {
+            y_delta -= BASE_SPEED;
+        }
 
-    // BUG: (debug-only) Causing stagger when mouse moves
-    transform.translation.x += x_delta;
-    transform.translation.y += y_delta;
+        // BUG: (debug-only) Causing stagger when mouse moves
+        transform.translation.x += x_delta;
+        transform.translation.y += y_delta;
+    }
 }

@@ -18,6 +18,7 @@ impl Plugin for RustGamePlugin {
 pub enum AppState {
     InGame,
     Win,
+    Loose,
 }
 
 fn setup_states(app: &mut App) {
@@ -41,10 +42,21 @@ fn setup_states(app: &mut App) {
             .with_system(person::move_person)
             .with_system(wall::check_wall_collision)
             .with_system(enemy::move_enemy)
-            .with_system(game_rules::check_win_conditions),
+            .with_system(enemy::check_player_collision)
+            .with_system(game_rules::check_win_conditions)
+            .with_system(game_rules::check_loose_conditions),
     );
     app.add_system_set(
         SystemSet::on_enter(AppState::Win).with_system(game_rules::display_win_screen),
     );
-    app.add_system_set(SystemSet::on_update(AppState::Win).with_system(game_rules::button_system));
+    app.add_system_set(
+        SystemSet::on_update(AppState::Win).with_system(game_rules::win_button_system),
+    );
+
+    app.add_system_set(
+        SystemSet::on_enter(AppState::Loose).with_system(game_rules::display_loose_screen),
+    );
+    app.add_system_set(
+        SystemSet::on_update(AppState::Loose).with_system(game_rules::loose_button_system),
+    );
 }
