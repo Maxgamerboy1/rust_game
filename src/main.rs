@@ -1,11 +1,11 @@
 // MARK: top-level module definitions
-mod rust_game_plugin;
-mod main_scene;
-mod gun;
-mod person;
-mod wall;
 mod enemy;
 mod game_rules;
+mod gun;
+mod person;
+mod rust_game_plugin;
+mod scenes;
+mod wall;
 
 // use std::env;
 
@@ -15,7 +15,7 @@ use rust_game_plugin::RustGamePlugin;
 fn main() {
     // env::set_var("RUST_BACKTRACE", "full");
     App::new()
-    .add_plugins(DefaultPlugins)
-    .add_plugin(RustGamePlugin)
-    .run();
+        .add_plugins(DefaultPlugins)
+        .add_plugin(RustGamePlugin)
+        .run();
 }

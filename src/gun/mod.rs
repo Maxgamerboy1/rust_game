@@ -71,14 +71,14 @@ pub fn set_aim_lock(
     let mut rotation_lock = q_gun_child.single_mut();
     for input in keyboard_event.iter() {
         match input.key_code {
-            Some(x) if x == KeyCode::Left => {
+            Some(x) if x == KeyCode::J => {
                 rotation_lock.angle = if input.state.is_pressed() {
                     ROTATION_SPEED
                 } else {
                     0.0
                 };
             }
-            Some(x) if x == KeyCode::Right => {
+            Some(x) if x == KeyCode::L => {
                 rotation_lock.angle = if input.state.is_pressed() {
                     -ROTATION_SPEED
                 } else {

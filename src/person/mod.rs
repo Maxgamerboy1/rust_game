@@ -87,3 +87,10 @@ pub fn move_person(mut query: Query<(&mut Transform, &MovementLock), With<Person
         transform.translation.y += y_delta;
     }
 }
+
+pub fn teardown(p_query: Query<Entity, With<Person>>, mut commands: Commands) {
+    println!("Exited!");
+    if let Ok(person) = p_query.get_single() {
+        commands.entity(person).despawn_recursive();
+    }
+}

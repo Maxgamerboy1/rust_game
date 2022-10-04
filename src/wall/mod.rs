@@ -61,3 +61,9 @@ pub fn check_wall_collision(
         }
     }
 }
+
+pub fn teardown(w_query: Query<Entity, With<Wall>>, mut commands: Commands) {
+    for wall in w_query.iter() {
+        commands.entity(wall).despawn();
+    }
+}
